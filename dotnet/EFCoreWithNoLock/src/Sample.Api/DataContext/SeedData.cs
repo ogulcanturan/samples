@@ -26,25 +26,25 @@ namespace Sample.Api.DataContext
             Product[] sampleProducts =
             [
                 new Product
-                {
-                    Name = "Sample Product 1",
-                    Price = 10.99m,
-                    Description = "This is a sample product.",
-                    Stock = 100
-                },
-                new Product{
-                    Name = "Sample Product 2",
-                    Price = 20.99m,
-                    Description = "This is another sample product.",
-                    Stock = 50
-                },
-                new Product
-                {
-                    Name = "Sample Product 3",
-                    Price = 30.99m,
-                    Description = "This is yet another sample product.",
-                    Stock = 25
-                }
+                    {
+                        Name = "Sample Product 1",
+                        Price = 10.99m,
+                        Description = "This is a sample product.",
+                        Stock = 100
+                    },
+                    new Product{
+                        Name = "Sample Product 2",
+                        Price = 20.99m,
+                        Description = "This is another sample product.",
+                        Stock = 50
+                    },
+                    new Product
+                    {
+                        Name = "Sample Product 3",
+                        Price = 30.99m,
+                        Description = "This is yet another sample product.",
+                        Stock = 25
+                    }
             ];
 
             sampleApiDbContext.Products.AddRange(sampleProducts);

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Console;
+using Sample.Api;
 using Sample.Api.DataContext;
 using Sample.Api.Observers;
 
@@ -13,7 +14,8 @@ builder.Services.AddLogging(cfg => cfg.AddSimpleConsole(opts =>
     opts.ColorBehavior = LoggerColorBehavior.Enabled;
 }));
 
-var connectionStringForSqlServer = builder.Configuration.GetConnectionString("SqlServer");
+// Retrieving connection string from the appsettings.json
+var connectionStringForSqlServer = builder.Configuration.GetConnectionString("SqlServer"); 
 
 builder.Services.AddDbContext<SampleApiDbContext>(opts =>
 {
@@ -31,7 +33,7 @@ await SeedData.EnsurePopulatedAsync(app); // Create database and ensure contains
 
 app.MapGet("/products", async (SampleApiDbContext dbContext, HttpContext httpContext) =>
 {
-    var products = await dbContext.Products.AsNoTracking().ToArrayAsync(httpContext.RequestAborted);
+    var products = await dbContext.Products.WithNoLock().ToArrayAsync(httpContext.RequestAborted);
 
     return Results.Ok(products);
 });

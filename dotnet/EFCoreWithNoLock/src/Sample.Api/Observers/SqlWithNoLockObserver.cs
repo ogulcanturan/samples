@@ -5,6 +5,7 @@ namespace Sample.Api.Observers
 {
     public class SqlWithNoLockObserver : IObserver<KeyValuePair<string, object>>
     {
+        private const string WithNoLockTagCommand = $"-- {QueryableExtensions.WithNoLockTag}";
         private const string WithNoLockReplacement = "$1 $2 $3 WITH (NOLOCK)";
 
         private static readonly Regex WithNoLockRegex = new(
@@ -25,13 +26,13 @@ namespace Sample.Api.Observers
             {
                 return;
             }
-
+            
             var commandEventData = (CommandEventData)value.Value;
 
-            var executeMethod = commandEventData.ExecuteMethod;
-
-            if (executeMethod == DbCommandMethod.ExecuteNonQuery)
+            if (commandEventData.ExecuteMethod == DbCommandMethod.ExecuteNonQuery || !commandEventData.Command.CommandText.StartsWith(WithNoLockTagCommand))
+            {
                 return;
+            }
 
             commandEventData.Command.CommandText = WithNoLockRegex.Replace(commandEventData.Command.CommandText, WithNoLockReplacement);
         }
