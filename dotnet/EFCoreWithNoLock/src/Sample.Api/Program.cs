@@ -4,15 +4,16 @@ using Sample.Api;
 using Sample.Api.DataContext;
 using Sample.Api.Observers;
 
-EfGlobalListener.Start(); // Adds a global listener for EF Core events. ( Includes SqlWithNoLockObserver )
+// Adds a global listener for EF Core events. ( Includes SqlWithNoLockObserver )
+EfGlobalListener.Start(); 
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddLogging(cfg => cfg.AddSimpleConsole(opts =>
+builder.Logging.AddSimpleConsole(opts =>
 {
     opts.TimestampFormat = "yyyy-MM-ddTHH:mm:ss.fffffffZ-";
     opts.ColorBehavior = LoggerColorBehavior.Enabled;
-}));
+});
 
 // Retrieving connection string from the appsettings.json
 var connectionStringForSqlServer = builder.Configuration.GetConnectionString("SqlServer"); 
@@ -29,7 +30,8 @@ builder.Services.AddDbContext<SampleApiDbContext>(opts =>
 
 var app = builder.Build();
 
-await SeedData.EnsurePopulatedAsync(app); // Create database and ensure contains sample data.
+// Create database and ensure contains sample data.
+await SeedData.EnsurePopulatedAsync(app); 
 
 app.MapGet("/products", async (SampleApiDbContext dbContext, HttpContext httpContext) =>
 {
@@ -40,4 +42,5 @@ app.MapGet("/products", async (SampleApiDbContext dbContext, HttpContext httpCon
 
 app.Run();
 
-EfGlobalListener.Stop(); // Stops the global listener for EF Core events.
+// Stops the global listener for EF Core events.
+EfGlobalListener.Stop(); 
