@@ -29,7 +29,7 @@ app.MapGet("/get-products-via-http-client", async (ISampleApiClient sampleApiHtt
 app.MapGet("/products", async () =>
 {
     // Simulating a long-running task - Tweak number to observe, TotalRequestTimeout & AttemptTimeout
-    // await Task.Delay(TimeSpan.FromSeconds(45));
+    await Task.Delay(TimeSpan.FromSeconds(2));
 
     return Results.Ok(new List<object>
     {

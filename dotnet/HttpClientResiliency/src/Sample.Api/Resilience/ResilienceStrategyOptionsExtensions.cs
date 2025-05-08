@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Http.Resilience;
+using Polly;
 using Polly.RateLimiting;
 
 namespace Sample.Api.Resilience
@@ -59,15 +60,29 @@ namespace Sample.Api.Resilience
             };
         }
 
+        public static void HandleTimeoutActions(this HttpTimeoutStrategyOptions options, ILogger logger, string builderName, string strategy)
+        {
+            options.OnTimeout = timeout =>
+            {
+                var requestMessage = timeout.Context.GetRequestMessage();
+
+                Logs.HandleTimeoutActionsError(logger, strategy, $"{timeout.Timeout}", $"{requestMessage?.RequestUri}", null);
+
+                return ValueTask.CompletedTask;
+            };
+        }
+
         private static class Logs
         {
-            public static readonly Action<ILogger, string, string, Exception> HandleRateLimiterOnRejectedError = LoggerMessage.Define<string, string>(LogLevel.Error, 1, "{retryStrategyName} - Request rejected. Reason(s): {reasons}");
+            public static readonly Action<ILogger, string, string, Exception> HandleRateLimiterOnRejectedError = LoggerMessage.Define<string, string>(LogLevel.Error, 1, "{strategyName} - Request rejected. Reason(s): {reasons}");
 
-            public static readonly Action<ILogger, string, Exception> HandleCircuitBreakerOnClosedInfo = LoggerMessage.Define<string>(LogLevel.Information, 2, "{retryStrategyName} - Circuit is now closed and connection re-established.");
+            public static readonly Action<ILogger, string, Exception> HandleCircuitBreakerOnClosedInfo = LoggerMessage.Define<string>(LogLevel.Information, 2, "{strategyName} - Circuit is now closed and connection re-established.");
 
-            public static readonly Action<ILogger, string, string, double, Exception> HandleCircuitBreakerOnOpenedActionError = LoggerMessage.Define<string, string, double>(LogLevel.Error, 3, "{retryStrategyName} - Circuit broken due to exception. Message: {message}, will reset in {breakDurationInSeconds} seconds.");
+            public static readonly Action<ILogger, string, string, double, Exception> HandleCircuitBreakerOnOpenedActionError = LoggerMessage.Define<string, string, double>(LogLevel.Error, 3, "{strategyName} - Circuit broken due to exception. Message: {message}, will reset in {breakDurationInSeconds} seconds.");
 
-            public static readonly Action<ILogger, string, string, int, Exception> HandleRetryActionsError = LoggerMessage.Define<string, string, int>(LogLevel.Error, 4, "{retryStrategyName} - Failed due to exception. Message: {message}, Attempt: {attemptNumber}.");
+            public static readonly Action<ILogger, string, string, int, Exception> HandleRetryActionsError = LoggerMessage.Define<string, string, int>(LogLevel.Error, 4, "{strategyName} - Failed due to exception. Message: {message}, Attempt: {attemptNumber}.");
+
+            public static readonly Action<ILogger, string, string, string, Exception> HandleTimeoutActionsError = LoggerMessage.Define<string, string, string>(LogLevel.Error, 5, "{strategyName} - The operation didn't complete within the allowed timeout of '{timeout}'. Uri: '{requestUri}'.");
         }
     }
 }

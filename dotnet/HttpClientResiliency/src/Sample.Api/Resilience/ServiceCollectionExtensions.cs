@@ -1,7 +1,7 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Http.Resilience;
+using Microsoft.Extensions.Options;
 using Polly;
 using Polly.RateLimiting;
-using Polly.Timeout;
 
 namespace Sample.Api.Resilience
 {
@@ -59,11 +59,13 @@ namespace Sample.Api.Resilience
 
                 if (hasTotalRequestTimeoutStrategy && resilienceOptions.TotalRequestTimeoutStrategies.TryGetValue(totalRequestTimeoutStrategyKey!, out var totalRequestTimeout))
                 {
-                    var timeout = new TimeoutStrategyOptions
+                    var timeout = new HttpTimeoutStrategyOptions
                     {
                         Name = totalRequestTimeoutStrategyKey,
                         Timeout = totalRequestTimeout
                     };
+
+                    timeout.HandleTimeoutActions(logger, builder.Name, nameof(ResilienceStrategy.TotalRequestTimeout));
 
                     resiliencePipelineBuilder.AddTimeout(timeout);
                 }
@@ -88,11 +90,13 @@ namespace Sample.Api.Resilience
 
                 if (hasAttemptTimeoutStrategy && resilienceOptions.AttemptTimeoutStrategies.TryGetValue(attemptTimeoutStrategyKey!, out var attemptTimeout))
                 {
-                    var timeout = new TimeoutStrategyOptions
+                    var timeout = new HttpTimeoutStrategyOptions
                     {
                         Name = attemptTimeoutStrategyKey,
                         Timeout = attemptTimeout
                     };
+
+                    timeout.HandleTimeoutActions(logger, builder.Name, nameof(ResilienceStrategy.AttemptTimeout));
 
                     resiliencePipelineBuilder.AddTimeout(timeout);
                 }
